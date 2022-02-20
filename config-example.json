@@ -1,0 +1,21 @@
+{
+    "octopus":{
+        "apikey": "<api key>",
+        "electricity": {
+            "mpan": "#############",
+            "serial": "##########",
+            "cost": 0.0000 
+        },
+        "gas": {
+            "mprn": "##########",
+            "serial": "#############",
+            "cost": 0.0000
+        }
+    },
+    "influx":{
+        "token": "<influx token>",
+        "bucket": "bukcet",
+        "org":"org",
+        "url": "http://example.org"
+    }
+}
