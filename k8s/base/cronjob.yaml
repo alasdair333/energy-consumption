@@ -16,12 +16,11 @@ spec:
           - image: registry.home.echo-moo.co.uk/energy:0.1
             imagePullPolicy: IfNotPresent
             name: energy-consumption
-            restartPolicy: OnFailure
             volumeMounts:
               - name: config
                 mountPath: /usr/src/app/config.json
                 subPath: config.json
-          voulmes:
+          volumes:
           - name: config
             configMap:
               name: config
