@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: energy-consumption
+  namespace: energy
+spec:
+  schedule: "0 0 * * *"
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: energy-consumption
+        spec:
+          containers:
+          - image: registry.home.echo-moo.co.uk/energy:0.1
+            imagePullPolicy: IfNotPresent
+            name: energy-consumption
+            restartPolicy: OnFailure
+            volumeMounts:
+              - name: config
+                mountPath: /usr/src/app/config.json
+                subPath: config.json
+          voulmes:
+          - name: config
+            configMap:
+              name: config
+

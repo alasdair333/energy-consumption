@@ -74,7 +74,7 @@ func getReadings(u *url.URL, cost float32) ([]costing, error) {
 				return nil, err
 			}
 			next_page.User = u.User
-			next_page.RawQuery = u.RawQuery
+			//next_page.RawQuery = u.RawQuery
 
 			page = next_page.String()
 		} else {
@@ -100,7 +100,7 @@ func GetConsumption(os octopus_settings) (costings, error) {
 	u.Path = fmt.Sprintf(api_electricity_fmt, os.Electricity.Mpan, os.Electricity.Serial)
 
 	t := time.Now()
-	past := t.Add(time.Duration(-48) * time.Hour)
+	past := t.Add(time.Duration(-168) * time.Hour)
 	q := u.Query()
 	q.Set("period_from", past.Format(time.RFC3339))
 	u.RawQuery = q.Encode()
