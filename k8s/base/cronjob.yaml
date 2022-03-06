@@ -12,10 +12,12 @@ spec:
           labels:
             app: energy-consumption
         spec:
+          restartPolicy: OnFailure
           containers:
           - image: registry.home.echo-moo.co.uk/energy:0.1
             imagePullPolicy: IfNotPresent
             name: energy-consumption
+
             volumeMounts:
               - name: config
                 mountPath: /usr/src/app/config.json
