@@ -1,4 +1,4 @@
-package main
+package octopus
 
 import (
 	"encoding/json"
@@ -8,6 +8,15 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+
+	"energy.echo-moo.co.uk/internal/types"
+)
+
+const (
+	uri                 = "https://api.octopus.energy"
+	api_electricity_fmt = "/v1/electricity-meter-points/%s/meters/%s/consumption/"
+	api_gas_fmt         = "/v1/gas-meter-points/%s/meters/%s/consumption/"
+	query_periodfrom    = "period_from=%s"
 )
 
 type meter_points struct {
@@ -23,15 +32,20 @@ type consumptionResp struct {
 	Readings []meter_points `json:"results"`
 }
 
-const uri = "https://api.octopus.energy"
-const api_electricity_fmt = "/v1/electricity-meter-points/%s/meters/%s/consumption/"
-const api_gas_fmt = "/v1/gas-meter-points/%s/meters/%s/consumption/"
-const query_periodfrom = "period_from=%s"
+type Octopus struct {
+	settings OctopusSettings
+}
 
-func getReadings(u *url.URL, cost float32) ([]costing, error) {
+func New(s OctopusSettings) *Octopus {
+	return &Octopus{
+		settings: s,
+	}
+}
+
+func (o *Octopus) getReadings(u *url.URL, cost float32) ([]types.Costing, error) {
 	page := u.String()
 
-	var c []costing
+	var c []types.Costing
 
 	for page != "" {
 		response, err := http.Get(page)
@@ -61,7 +75,7 @@ func getReadings(u *url.URL, cost float32) ([]costing, error) {
 				return c, err
 			}
 
-			c = append(c, costing{
+			c = append(c, types.Costing{
 				Reading: r.Consumpton,
 				Cost:    r.Consumpton * cost,
 				Date:    t,
@@ -86,8 +100,8 @@ func getReadings(u *url.URL, cost float32) ([]costing, error) {
 	return c, nil
 }
 
-func GetConsumption(os octopus_settings) (costings, error) {
-	var c costings
+func (o *Octopus) GetConsumption() (types.Costings, error) {
+	var c types.Costings
 
 	u, err := url.Parse(uri)
 
@@ -96,8 +110,8 @@ func GetConsumption(os octopus_settings) (costings, error) {
 		return c, err
 	}
 
-	u.User = url.User(os.Apikey)
-	u.Path = fmt.Sprintf(api_electricity_fmt, os.Electricity.Mpan, os.Electricity.Serial)
+	u.User = url.User(o.settings.Apikey)
+	u.Path = fmt.Sprintf(api_electricity_fmt, o.settings.Electricity.Mpan, o.settings.Electricity.Serial)
 
 	t := time.Now()
 	past := t.Add(time.Duration(-168) * time.Hour)
@@ -105,10 +119,10 @@ func GetConsumption(os octopus_settings) (costings, error) {
 	q.Set("period_from", past.Format(time.RFC3339))
 	u.RawQuery = q.Encode()
 
-	c.Electricity, err = getReadings(u, os.Electricity.Cost)
+	c.Electricity, err = o.getReadings(u, o.settings.Electricity.Cost)
 
-	u.Path = fmt.Sprintf(api_gas_fmt, os.Gas.Mprn, os.Gas.Serial)
-	c.Gas, err = getReadings(u, os.Gas.Cost)
+	u.Path = fmt.Sprintf(api_gas_fmt, o.settings.Gas.Mprn, o.settings.Gas.Serial)
+	c.Gas, err = o.getReadings(u, o.settings.Gas.Cost)
 
 	return c, nil
 }
