@@ -19,7 +19,7 @@ func New(s InfluxSettings) *Influx {
 
 func (i *Influx) WriteData(c types.Costings) {
 
-	client := influxdb2.NewClient(i.settings.Token, i.settings.Token)
+	client := influxdb2.NewClient(i.settings.Url, i.settings.Token)
 	defer client.Close()
 
 	// get non-blocking write client
