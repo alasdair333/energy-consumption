@@ -1,18 +1,29 @@
-package main
+package influx
 
 import (
 	"fmt"
 
+	"energy.echo-moo.co.uk/internal/types"
 	influxdb2 "github.com/influxdata/influxdb-client-go/v2"
 )
 
-func write_data(is influx_settings, c costings) {
+type Influx struct {
+	settings InfluxSettings
+}
 
-	client := influxdb2.NewClient(is.Url, is.Token)
+func New(s InfluxSettings) *Influx {
+	return &Influx{
+		settings: s,
+	}
+}
+
+func (i *Influx) WriteData(c types.Costings) {
+
+	client := influxdb2.NewClient(i.settings.Url, i.settings.Token)
 	defer client.Close()
 
 	// get non-blocking write client
-	writeAPI := client.WriteAPI(is.Org, is.Bucket)
+	writeAPI := client.WriteAPI(i.settings.Org, i.settings.Bucket)
 
 	for _, point := range c.Electricity {
 
